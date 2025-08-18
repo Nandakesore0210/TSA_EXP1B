@@ -96,6 +96,9 @@ data.plot(kind='line')
 #### LOG TRANSFORMATION:
 <img width="824" height="223" alt="image" src="https://github.com/user-attachments/assets/25627cde-da6d-4500-b968-10287fa77a82" />
 
+#### Log Transformation and Regular Differencing:
+<img width="733" height="251" alt="image" src="https://github.com/user-attachments/assets/d3767b0f-f509-4ae4-a9e7-7f007323b4f7" />
+
 #### Log Transformation and Regular Differencing and Seasonal Differencing:
 <img width="847" height="614" alt="image" src="https://github.com/user-attachments/assets/58ef8940-9628-4c47-a267-2ece0bdd54c9" />
 
