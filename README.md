@@ -16,95 +16,112 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
-data=pd.read_csv('/content/Crypto Data Since 2015.csv')
-data['Date']=pd.to_datetime(data['Date'])
-data.set_index('Date',inplace=True)
 
-data['Bitcoin (USD)_diff']=data['Bitcoin (USD)']-data['Bitcoin (USD)'].shift(1)
+file_path = "/content/AirPassengers.csv"
+data = pd.read_csv(file_path)
 
-result = seasonal_decompose(data['Bitcoin (USD)'], model='additive', period=12)
-data['Bitcoin (USD)_sea_diff']=result.resid
+if 'Month' not in data.columns:
+    data.rename(columns={data.columns[0]: 'Month'}, inplace=True)
 
-data['Bitcoin (USD)_log'] = np.log(data['Bitcoin (USD)'])
-data['Bitcoin (USD)_log_diff']=data['Bitcoin (USD)_log']-data['Bitcoin (USD)_log'].shift(1)
-result = seasonal_decompose(data['Bitcoin (USD)_log_diff'].dropna(), model='additive', period=30)
-plt.figure(figsize=(16, 16))
+if '#Passengers' not in data.columns:
+    data.rename(columns={data.columns[1]: '#Passengers'}, inplace=True)
+
+data['Month'] = pd.to_datetime(data['Month'], errors='coerce')
+data = data.dropna(subset=['Month'])
+data.set_index('Month', inplace=True)
+
+data['#Passengers'] = pd.to_numeric(data['#Passengers'], errors='coerce')
+data = data.dropna()
+
+data['passengers_diff'] = data['#Passengers'] - data['#Passengers'].shift(1)
+
+result = seasonal_decompose(data['#Passengers'], model='additive', period=12)
+data['passengers_sea_diff'] = result.resid
+
+data['passengers_log'] = np.log(data['#Passengers'])
+
+data['passengers_log_diff'] = data['passengers_log'] - data['passengers_log'].shift(1)
+
+result = seasonal_decompose(data['passengers_log_diff'].dropna(), model='additive', period=12)
+data['passengers_log_seasonal_diff'] = result.resid
+
+plt.figure(figsize=(16, 18))
+
 plt.subplot(6, 1, 1)
-plt.plot(data['Bitcoin (USD)'], label='Original')
+plt.plot(data['#Passengers'], label='Original')
 plt.legend(loc='best')
 plt.title('Original Data')
 plt.xlabel('Year')
-plt.ylabel('No of Bitcoin (USD)')
+plt.ylabel('No of Passengers')
+
 plt.subplot(6, 1, 2)
-plt.plot(data['Bitcoin (USD)_diff'], label='Regular Difference')
+plt.plot(data['passengers_diff'], label='Regular Differencing')
 plt.legend(loc='best')
 plt.title('Regular Differencing')
 plt.xlabel('Year')
-plt.ylabel('Differenced No of Bitcoin (USD)')
+plt.ylabel('Differenced No of Passengers')
+
 plt.subplot(6, 1, 3)
-plt.plot(data['Bitcoin (USD)_sea_diff'], label='Seasonal Adjustment')
+plt.plot(data['passengers_sea_diff'], label='Seasonal Adjustment')
 plt.legend(loc='best')
 plt.title('Seasonal Adjustment')
 plt.xlabel('Year')
-plt.ylabel('Seasonally djusted No of Bitcoin (USD)')
+plt.ylabel('Seasonally Adjusted Passengers')
+
 plt.subplot(6, 1, 4)
-plt.plot(data['Bitcoin (USD)_log'], label='Log Transformation')
+plt.plot(data['passengers_log'], label='Log Transformation')
 plt.legend(loc='best')
 plt.title('Log Transformation')
 plt.xlabel('Year')
-plt.ylabel('Log(No of Bitcoin (USD))')
+plt.ylabel('Log(No of Passengers)')
+
 plt.subplot(6, 1, 5)
-plt.plot(data['Bitcoin (USD)_log_diff'], label='Log Transformation and Regular Differencing')
+plt.plot(data['passengers_log_diff'], label='Log + Regular Differencing')
 plt.legend(loc='best')
-plt.title('Log Transformation and Regular Differencing')
+plt.title('Log Transformation + Regular Differencing')
 plt.xlabel('Year')
-plt.ylabel('RDiff(Log(No of Bitcoin (USD)))')
+plt.ylabel('RDiff(Log(No of Passengers))')
+
 plt.subplot(6, 1, 6)
-from statsmodels.tsa.seasonal import seasonal_decompose
-
-result = seasonal_decompose(
-    data['Bitcoin (USD)_log_diff'].dropna(), 
-    model='additive', 
-    period=30 
-)
-
-data['Bitcoin (USD)_log_seasonal_diff'] = result.resid
-
-plt.plot(data['Bitcoin (USD)_log_seasonal_diff'], label='Log Transformation and regular Diff')
+plt.plot(data['passengers_log_seasonal_diff'], label='Log + Regular + Seasonal Differencing')
 plt.legend(loc='best')
-plt.title('Log Transformation and Regular Differencing and Seasonal Differencing')
+plt.title('Log Transformation + Regular Differencing + Seasonal Differencing')
 plt.xlabel('Year')
-plt.ylabel('SDiff(RDiff(Log(No of Bitcoin (USD))))')
+plt.ylabel('SDiff(RDiff(Log(No of Passengers)))')
+
 plt.tight_layout()
 plt.show()
 
-data.plot(kind='line')
+data.plot(kind='line', figsize=(14, 7), title="All Transformations")
+plt.show()
+
+print("\nFinal Data (first 10 rows):")
+print(data.head(10))
+
 ```
 
 
 ### OUTPUT:
 
 #### Original Data:
-<img width="1352" height="294" alt="image" src="https://github.com/user-attachments/assets/78a89be5-6833-40f1-bf0d-69a6323cce90" />
+<img width="1732" height="303" alt="image" src="https://github.com/user-attachments/assets/3853d759-d575-42ff-9f1a-50e961b43a59" />
 
 #### REGULAR DIFFERENCING:
-<img width="829" height="221" alt="image" src="https://github.com/user-attachments/assets/bfad33df-9bf1-4f7d-9764-333702658fc3" />
+<img width="1737" height="328" alt="image" src="https://github.com/user-attachments/assets/b70520da-1240-4013-8ab9-27fea6208a6a" />
 
 #### SEASONAL ADJUSTMENT:
-<img width="832" height="221" alt="image" src="https://github.com/user-attachments/assets/0843e188-6cdc-4ec2-b2dd-840890ae15cb" />
+<img width="1740" height="325" alt="image" src="https://github.com/user-attachments/assets/e3782e4a-bb19-4865-bf01-2d9f6885936c" />
 
 #### LOG TRANSFORMATION:
-<img width="824" height="223" alt="image" src="https://github.com/user-attachments/assets/25627cde-da6d-4500-b968-10287fa77a82" />
+<img width="1747" height="317" alt="image" src="https://github.com/user-attachments/assets/97c1560e-e146-4ae7-a398-f81587210033" />
 
 #### Log Transformation and Regular Differencing:
-<img width="733" height="251" alt="image" src="https://github.com/user-attachments/assets/d3767b0f-f509-4ae4-a9e7-7f007323b4f7" />
+<img width="1748" height="308" alt="image" src="https://github.com/user-attachments/assets/528bbcc0-270e-4ea9-9c00-c883caa99810" />
 
 #### Log Transformation and Regular Differencing and Seasonal Differencing:
-<img width="847" height="614" alt="image" src="https://github.com/user-attachments/assets/58ef8940-9628-4c47-a267-2ece0bdd54c9" />
+<img width="1749" height="331" alt="image" src="https://github.com/user-attachments/assets/32464f32-e3c7-4e30-9fed-f2c6869dbf92" />
 
-<img width="721" height="533" alt="image" src="https://github.com/user-attachments/assets/3c20a3ad-8d3a-4104-9137-fe7f4bd2635b" />
-
-
+<img width="1287" height="710" alt="image" src="https://github.com/user-attachments/assets/cab0c35c-f43f-42e1-a30d-9d3a64b93716" />
 
 ### RESULT:
 Thus we have created the python code for the conversion of non stationary to stationary data on international airline passenger
